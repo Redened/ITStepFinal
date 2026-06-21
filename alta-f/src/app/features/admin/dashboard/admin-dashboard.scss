@@ -1,0 +1,99 @@
+.dashboard {
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  &__panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  &__panel {
+    padding: var(--spacing-lg);
+
+    &-title {
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--spacing-md);
+    }
+  }
+
+  // Top-products bar chart (pure CSS)
+  &__bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--spacing-md);
+    row-gap: var(--spacing-2xs);
+  }
+
+  &__bar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  &__bar-value {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__bar-track {
+    grid-column: 1 / -1;
+    height: 8px;
+    border-radius: var(--radius-full, 999px);
+    background: var(--color-surface-2, color-mix(in srgb, var(--color-border) 50%, transparent));
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: var(--color-accent);
+    transition: width var(--transition-slow);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding-block: var(--spacing-xs);
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child { border-bottom: 0; }
+  }
+
+  &__list-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

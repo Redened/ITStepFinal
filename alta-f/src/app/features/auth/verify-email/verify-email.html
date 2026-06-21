@@ -1,0 +1,58 @@
+<section class="auth-form auth-form--centered" aria-labelledby="verify-heading">
+  <span class="auth-form__icon" aria-hidden="true">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  </span>
+  <h2 id="verify-heading" class="auth-form__title">Check your email</h2>
+  <p class="auth-form__subtitle">
+    We sent a verification code to
+    @if (email()) {
+      <strong>{{ email() }}</strong>
+    } @else {
+      your email address
+    }
+  </p>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-md" role="alert">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-group">
+      <label class="form-label" for="code">Verification code</label>
+      <input
+        id="code"
+        type="text"
+        class="form-input auth-form__code-input"
+        [class.is-invalid]="codeCtrl.invalid && codeCtrl.touched"
+        formControlName="code"
+        autocomplete="one-time-code"
+        inputmode="numeric"
+        aria-required="true"
+        [attr.aria-describedby]="codeCtrl.invalid && codeCtrl.touched ? 'code-error' : null"
+      />
+      @if (codeCtrl.invalid && codeCtrl.touched) {
+        <span id="code-error" class="form-error" role="alert">Please enter the verification code.</span>
+      }
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary btn-full mt-lg"
+      [disabled]="loading()"
+      aria-live="polite"
+    >
+      @if (loading()) {
+        <span class="spinner" style="width:18px;height:18px;" aria-hidden="true"></span>
+        Verifying…
+      } @else {
+        Verify email
+      }
+    </button>
+  </form>
+
+  <p class="auth-form__footer">
+    <a routerLink="/auth/login" class="auth-form__link">Back to sign in</a>
+  </p>
+</section>

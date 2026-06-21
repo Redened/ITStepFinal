@@ -1,0 +1,99 @@
+<div class="address-book">
+  <div class="address-book__header">
+    <h3 class="address-book__title">Saved addresses</h3>
+    @if (!showForm()) {
+      <button class="btn btn-primary btn-sm" (click)="openCreate()">+ Add address</button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <form class="address-book__form card" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="addr-title">Label</label>
+          <input id="addr-title" class="form-input" type="text" formControlName="title" placeholder="Home, Work…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="addr-name">Full name</label>
+          <input id="addr-name" class="form-input" type="text" formControlName="fullName" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="addr-line">Address</label>
+        <input id="addr-line" class="form-input" type="text" formControlName="line" placeholder="Street and number" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="addr-city">City</label>
+          <input id="addr-city" class="form-input" type="text" formControlName="city" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="addr-postal">Postal code</label>
+          <input id="addr-postal" class="form-input" type="text" formControlName="postalCode" />
+        </div>
+      </div>
+
+        <div class="form-group address-book__default">
+          <label class="form-label" for="addr-default">
+            <input id="addr-default" type="checkbox" formControlName="isDefault" />
+            Set as default
+          </label>
+        </div>
+
+      <div class="address-book__form-actions">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Save address' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <p class="text-muted" aria-live="polite">Loading addresses…</p>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  } @else if (addresses().length === 0 && !showForm()) {
+    <p class="text-muted">You have no saved addresses yet.</p>
+  } @else {
+    <ul class="address-book__list">
+      @for (address of addresses(); track address.id) {
+        <li class="address-card">
+          <div class="address-card__info">
+            <div class="address-card__title">
+              {{ address.title }}
+              @if (address.isDefault) {
+                <span class="badge badge-success">Default</span>
+              }
+            </div>
+            <div class="address-card__name">{{ address.fullName }}</div>
+            <div class="address-card__line">
+              {{ address.line }}, {{ address.city }}@if (address.postalCode) {, {{ address.postalCode }}}
+            </div>
+          </div>
+          <div class="address-card__actions">
+            <button class="btn btn-secondary btn-sm" (click)="openEdit(address)">Edit</button>
+            <button
+              class="btn btn-danger btn-sm"
+              (click)="requestDelete(address.id)"
+              [attr.aria-label]="'Delete address ' + address.title"
+            >Delete</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <app-confirm-dialog
+    [open]="deleteId() !== null"
+    title="Delete this address?"
+    [message]="deleteTarget() ? 'Delete the “' + deleteTarget() + '” address? This cannot be undone.' : 'This cannot be undone.'"
+    confirmLabel="Delete address"
+    variant="danger"
+    [loading]="deleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+</div>

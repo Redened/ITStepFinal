@@ -1,0 +1,12 @@
+@use '../admin-shared';
+
+.form-input--compact {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  width: auto;
+}
+
+.saving-indicator {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}

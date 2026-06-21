@@ -1,0 +1,130 @@
+<header class="navbar" role="banner">
+  <div class="container navbar__inner">
+    <a routerLink="/products" class="navbar__brand" aria-label="ALTA Shop – go to home">
+      <span class="navbar__brand-icon" aria-hidden="true">A</span>
+      <span class="navbar__brand-name">ALTA Shop</span>
+    </a>
+
+    <nav class="navbar__nav" aria-label="Main navigation">
+      <a
+        routerLink="/products"
+        routerLinkActive="navbar__link--active"
+        class="navbar__link"
+      >Products</a>
+    </nav>
+
+    <div class="navbar__actions">
+      <a
+        routerLink="/wishlist"
+        routerLinkActive="navbar__icon-btn--active"
+        class="navbar__icon-btn"
+        [attr.aria-label]="'Wishlist, ' + wishlistCount() + ' items'"
+      >
+        <svg class="navbar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+        @if (wishlistCount() > 0) {
+          <span class="navbar__badge" aria-hidden="true">{{ wishlistCount() }}</span>
+        }
+      </a>
+
+      <a
+        routerLink="/cart"
+        routerLinkActive="navbar__icon-btn--active"
+        class="navbar__icon-btn"
+        [attr.aria-label]="'Cart, ' + cartCount() + ' items'"
+      >
+        <svg class="navbar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        @if (cartCount() > 0) {
+          <span class="navbar__badge" aria-hidden="true">{{ cartCount() }}</span>
+        }
+      </a>
+
+      @if (isAuthenticated()) {
+        <div class="navbar__user">
+          <button
+            #userMenuTrigger
+            type="button"
+            class="navbar__user-btn"
+            (click)="toggleUserMenu()"
+            [attr.aria-expanded]="userMenuOpen()"
+            aria-haspopup="true"
+            aria-controls="user-menu"
+            aria-label="Account menu"
+          >
+            <svg class="navbar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <svg class="navbar__chevron" [class.navbar__chevron--open]="userMenuOpen()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          @if (userMenuOpen()) {
+            <div
+              id="user-menu"
+              class="navbar__menu"
+              role="menu"
+              aria-label="Account"
+              (keydown)="onUserMenuKeydown($event)"
+            >
+              <a #userMenuItem role="menuitem" routerLink="/profile" class="navbar__menu-item" (click)="closeUserMenu()">Profile</a>
+              <a #userMenuItem role="menuitem" routerLink="/orders" class="navbar__menu-item" (click)="closeUserMenu()">Orders</a>
+              @if (isStaff()) {
+                <a #userMenuItem role="menuitem" routerLink="/admin" class="navbar__menu-item" (click)="closeUserMenu()">Admin</a>
+              }
+              <div class="navbar__menu-divider" role="separator"></div>
+              <button #userMenuItem role="menuitem" type="button" class="navbar__menu-item navbar__menu-item--danger" (click)="logout()">Sign out</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/auth/login" class="navbar__link">Sign In</a>
+      }
+
+      <button
+        type="button"
+        class="navbar__hamburger"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-nav"
+        aria-label="Toggle navigation menu"
+      >
+        <span class="navbar__bar" [class.navbar__bar--open-1]="menuOpen()" aria-hidden="true"></span>
+        <span class="navbar__bar" [class.navbar__bar--open-2]="menuOpen()" aria-hidden="true"></span>
+        <span class="navbar__bar" [class.navbar__bar--open-3]="menuOpen()" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  @if (menuOpen()) {
+    <div class="navbar__backdrop" (click)="closeMenu()" aria-hidden="true"></div>
+    <nav id="mobile-nav" class="navbar__mobile" aria-label="Mobile navigation">
+      <a routerLink="/products" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">Products</a>
+      <a routerLink="/wishlist" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">
+        Wishlist
+        @if (wishlistCount() > 0) {
+          <span class="navbar__badge navbar__badge--inline" aria-hidden="true">{{ wishlistCount() }}</span>
+        }
+      </a>
+      <a routerLink="/cart" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">
+        Cart
+        @if (cartCount() > 0) {
+          <span class="navbar__badge navbar__badge--inline" aria-hidden="true">{{ cartCount() }}</span>
+        }
+      </a>
+      @if (isAuthenticated()) {
+        <a routerLink="/orders" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">Orders</a>
+        <a routerLink="/profile" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">Profile</a>
+        @if (isStaff()) {
+          <a routerLink="/admin" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">Admin</a>
+        }
+        <button type="button" class="navbar__mobile-link navbar__mobile-signout" (click)="logout()">Sign out</button>
+      } @else {
+        <a routerLink="/auth/login" routerLinkActive="navbar__mobile-link--active" class="navbar__mobile-link" (click)="closeMenu()">Sign In</a>
+      }
+    </nav>
+  }
+</header>

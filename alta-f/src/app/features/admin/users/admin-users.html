@@ -1,0 +1,87 @@
+<div class="admin-page">
+  <app-page-header title="Users" subtitle="Manage accounts and assign roles." />
+
+  @if (loading()) {
+    <div class="admin-skeleton" role="status" aria-label="Loading users" aria-busy="true">
+      @for (s of [0, 1, 2, 3, 4, 5]; track s) {
+        <app-skeleton shape="line" height="48px" />
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="alert alert-danger admin-page__error" role="alert">
+      <span>Couldn't load users.</span>
+      <button type="button" class="btn btn-sm btn-secondary" (click)="loadUsers(currentPage())">Try again</button>
+    </div>
+  } @else if (isEmpty()) {
+    <app-empty-state title="No users found" message="There are no users to display." />
+  } @else {
+    <div class="table-wrapper" role="region" aria-label="Users table" tabindex="0">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th scope="col" class="admin-table__num">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+            <th scope="col">Verified</th>
+            <th scope="col">Role</th>
+            <th scope="col">Change Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td class="admin-table__num" data-label="ID">{{ user.id }}</td>
+              <td data-label="Username">{{ user.username }}</td>
+              <td data-label="Email">{{ user.email }}</td>
+              <td data-label="Verified">
+                @if (user.isVerified) {
+                  <span class="badge badge-success"><span aria-hidden="true">✓</span> Verified</span>
+                } @else {
+                  <span class="badge badge-muted"><span aria-hidden="true">✗</span> Unverified</span>
+                }
+              </td>
+              <td data-label="Role">
+                <span class="badge" [class]="roleBadgeClass(user.role)">
+                  {{ roleLabel(user.role) }}
+                </span>
+              </td>
+              <td class="admin-table__actions" data-label="Change Role">
+                <select
+                  class="form-input form-input--compact"
+                  [disabled]="actionLoadingId() === user.id"
+                  [attr.aria-label]="'Change role for ' + user.username"
+                  (change)="onRoleSelect(user, $event)"
+                >
+                  <option [value]="UserRoles.User" [selected]="user.role === UserRoles.User">User</option>
+                  <option [value]="UserRoles.Manager" [selected]="user.role === UserRoles.Manager">Manager</option>
+                  <option [value]="UserRoles.Admin" [selected]="user.role === UserRoles.Admin">Admin</option>
+                </select>
+                @if (actionLoadingId() === user.id) {
+                  <span class="saving-indicator" aria-live="polite">Saving…</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>
+
+<app-confirm-dialog
+  [open]="pendingRole() !== null"
+  title="Change user role"
+  [message]="roleDialog()?.message ?? ''"
+  [confirmLabel]="roleDialog()?.confirmLabel ?? 'Confirm'"
+  [variant]="roleDialog()?.variant ?? 'primary'"
+  cancelLabel="Keep current"
+  [loading]="actionLoadingId() !== null"
+  (confirmed)="confirmRole()"
+  (cancelled)="cancelRole()"
+/>

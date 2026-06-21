@@ -1,0 +1,68 @@
+.address-book {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+  }
+
+  &__title {
+    font-size: var(--font-size-lg);
+    margin: 0;
+  }
+
+  &__form {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+
+    &-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+  }
+
+  &__default {
+    display: flex;
+    align-items: flex-end;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.address-card {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  &__title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-2xs);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+}

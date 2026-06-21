@@ -1,0 +1,87 @@
+<article
+  class="product-card"
+  [class.product-card--out]="outOfStock()"
+  (click)="navigateToDetail()"
+>
+  <div class="product-card__image-wrap">
+    <img
+      [ngSrc]="imageSrc()"
+      [alt]="product().title || 'Product image'"
+      class="product-card__image"
+      fill
+      sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 25vw"
+    />
+
+    <div class="product-card__badges">
+      @if (hasDiscount()) {
+        <span class="product-card__badge product-card__badge--sale" aria-label="On sale">
+          -{{ product().discount }}%
+        </span>
+      }
+      @if (outOfStock()) {
+        <span class="product-card__badge product-card__badge--out">Out of stock</span>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="product-card__wishlist"
+      [class.product-card__wishlist--active]="isWishlisted()"
+      (click)="toggleWishlist($event)"
+      [disabled]="wishlistBusy()"
+      [attr.aria-pressed]="isWishlisted()"
+      [attr.aria-label]="(isWishlisted() ? 'Remove ' : 'Add ') + product().title + (isWishlisted() ? ' from' : ' to') + ' wishlist'"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isWishlisted() ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="product-card__body">
+    <h3 class="product-card__title">{{ product().title }}</h3>
+
+    <div class="product-card__rating">
+      @if (product().reviewCount > 0) {
+        <app-star-rating [value]="product().averageRating" [allowHalf]="true" size="sm" />
+        <span class="product-card__rating-count">({{ product().reviewCount }})</span>
+      } @else {
+        <span class="product-card__rating-empty">No reviews yet</span>
+      }
+    </div>
+
+    <div class="product-card__price-row">
+      @if (hasDiscount()) {
+        <span class="product-card__price">{{ product().discountedPrice | currency }}</span>
+        <span class="product-card__price-original">{{ product().price | currency }}</span>
+      } @else {
+        <span class="product-card__price">{{ product().price | currency }}</span>
+      }
+    </div>
+
+    <div class="product-card__stock" aria-live="polite">
+      @if (lowStock()) {
+        <span class="product-card__low-stock">Only {{ product().stock }} left</span>
+      } @else if (!outOfStock()) {
+        <span class="product-card__in-stock">In stock</span>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary btn-full product-card__btn"
+      (click)="addToCart($event)"
+      [disabled]="adding() || outOfStock()"
+      [attr.aria-label]="'Add ' + product().title + ' to cart'"
+    >
+      @if (adding()) {
+        <span class="spinner" style="width:15px;height:15px;" aria-hidden="true"></span>
+        Adding…
+      } @else if (outOfStock()) {
+        Out of stock
+      } @else {
+        Add to cart
+      }
+    </button>
+  </div>
+</article>

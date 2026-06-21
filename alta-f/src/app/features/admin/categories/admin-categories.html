@@ -1,0 +1,117 @@
+<div class="admin-page">
+  <app-page-header title="Categories" subtitle="Organize your products into a category hierarchy.">
+    <button page-actions class="btn btn-primary" (click)="openCreate()">+ Add Category</button>
+  </app-page-header>
+
+  @if (loading()) {
+    <div class="admin-skeleton" role="status" aria-label="Loading categories" aria-busy="true">
+      @for (s of [0, 1, 2, 3, 4, 5]; track s) {
+        <app-skeleton shape="line" height="48px" />
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="alert alert-danger admin-page__error" role="alert">
+      <span>Couldn't load categories.</span>
+      <button type="button" class="btn btn-sm btn-secondary" (click)="loadCategories()">Try again</button>
+    </div>
+  } @else if (isEmpty()) {
+    <app-empty-state title="No categories yet" message="Create your first category to organize your products." ctaLabel="+ Add Category" (ctaClick)="openCreate()" />
+  } @else {
+    <div class="table-wrapper" role="region" aria-label="Categories table" tabindex="0">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th scope="col" class="admin-table__num">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Parent</th>
+            <th scope="col">Image URL</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of orderedCategories(); track category.id) {
+            <tr>
+              <td class="admin-table__num" data-label="ID">{{ category.id }}</td>
+              <td data-label="Name">
+                <span class="cat-name" [style.paddingLeft.px]="category.depth * 20">
+                  @if (category.depth > 0) {
+                    <span class="cat-name__branch" aria-hidden="true">↳</span>
+                  }
+                  {{ category.name }}
+                </span>
+              </td>
+              <td data-label="Parent">{{ categoryName(category.parentId) }}</td>
+              <td class="url-cell" data-label="Image URL">{{ category.imageUrl }}</td>
+              <td class="admin-table__actions">
+                <button type="button" class="btn btn-sm btn-secondary" [attr.aria-label]="'Edit ' + category.name" (click)="openEdit(category)">Edit</button>
+                <button type="button" class="btn btn-sm btn-danger" [attr.aria-label]="'Delete ' + category.name" (click)="requestDelete(category)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<app-modal
+  [open]="showModal()"
+  [title]="editingCategory() ? 'Edit Category' : 'Add Category'"
+  (closed)="closeModal()"
+>
+  <form id="category-form" class="admin-modal-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage()) {
+      <p class="form-alert" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="form-group">
+      <label for="c-name" class="form-label">Name</label>
+      <input id="c-name" class="form-input" type="text" formControlName="name"
+        [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched" />
+    </div>
+
+    <div class="form-group">
+      <label for="c-image" class="form-label">Image URL</label>
+      <input id="c-image" class="form-input" type="url" formControlName="imageUrl"
+        [attr.aria-invalid]="form.controls.imageUrl.invalid && form.controls.imageUrl.touched" />
+      @if (imagePreview()) {
+        <div class="image-preview">
+          <img [src]="imagePreview()" alt="Category image preview" loading="lazy" />
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="c-description" class="form-label">Description <span class="form-hint">(optional)</span></label>
+      <textarea id="c-description" class="form-input" formControlName="description" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="c-parent" class="form-label">Parent category <span class="form-hint">(optional)</span></label>
+      <select id="c-parent" class="form-input" formControlName="parentId">
+        <option [ngValue]="0">None (top-level)</option>
+        @for (cat of parentOptions(); track cat.id) {
+          <option [ngValue]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+  </form>
+
+  <ng-container modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+    <button type="submit" form="category-form" class="btn btn-primary" [disabled]="formLoading()">
+      {{ formLoading() ? 'Saving…' : (editingCategory() ? 'Update' : 'Create') }}
+    </button>
+  </ng-container>
+</app-modal>
+
+<app-confirm-dialog
+  [open]="deleteTarget() !== null"
+  title="Delete category"
+  [message]="deleteMessage()"
+  confirmLabel="Delete"
+  variant="danger"
+  [loading]="actionLoadingId() !== null"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

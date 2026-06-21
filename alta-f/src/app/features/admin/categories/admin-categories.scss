@@ -1,0 +1,45 @@
+@use '../admin-shared';
+
+.url-cell {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+// Indented category name (child rows nest under their parent).
+.cat-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+
+  &__branch {
+    color: var(--color-text-muted);
+  }
+}
+
+// The create/edit form lives inside app-modal's body; give it column spacing.
+.admin-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.image-preview {
+  margin-top: var(--spacing-xs);
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-2);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}

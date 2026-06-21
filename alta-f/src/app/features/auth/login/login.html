@@ -1,0 +1,69 @@
+<section class="auth-form" aria-labelledby="login-heading">
+  <h2 id="login-heading" class="auth-form__title">Welcome back</h2>
+  <p class="auth-form__subtitle">Sign in to continue to ALTA Shop</p>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-md" role="alert">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-group">
+      <label class="form-label" for="email">Email address</label>
+      <input
+        id="email"
+        type="email"
+        class="form-input"
+        [class.is-invalid]="emailCtrl.invalid && emailCtrl.touched"
+        formControlName="email"
+        autocomplete="email"
+        aria-required="true"
+        [attr.aria-describedby]="emailCtrl.invalid && emailCtrl.touched ? 'email-error' : null"
+      />
+      @if (emailCtrl.invalid && emailCtrl.touched) {
+        <span id="email-error" class="form-error" role="alert">
+          @if (emailCtrl.errors?.['required']) { Email is required. }
+          @else { Enter a valid email address. }
+        </span>
+      }
+    </div>
+
+    <div class="form-group mt-md">
+      <div class="auth-form__label-row">
+        <label class="form-label" for="password">Password</label>
+        <a routerLink="/auth/forgot-password" class="auth-form__link-small">Forgot password?</a>
+      </div>
+      <input
+        id="password"
+        type="password"
+        class="form-input"
+        [class.is-invalid]="passwordCtrl.invalid && passwordCtrl.touched"
+        formControlName="password"
+        autocomplete="current-password"
+        aria-required="true"
+        [attr.aria-describedby]="passwordCtrl.invalid && passwordCtrl.touched ? 'password-error' : null"
+      />
+      @if (passwordCtrl.invalid && passwordCtrl.touched) {
+        <span id="password-error" class="form-error" role="alert">Password is required.</span>
+      }
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary btn-full mt-lg"
+      [disabled]="loading()"
+      aria-live="polite"
+    >
+      @if (loading()) {
+        <span class="spinner" style="width:18px;height:18px;" aria-hidden="true"></span>
+        Signing in…
+      } @else {
+        Sign in
+      }
+    </button>
+  </form>
+
+  <p class="auth-form__footer">
+    Don't have an account?
+    <a routerLink="/auth/register" class="auth-form__link">Create one</a>
+  </p>
+</section>
