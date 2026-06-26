@@ -1,0 +1,92 @@
+<section class="auth-form" aria-labelledby="register-heading">
+  <h2 id="register-heading" class="auth-form__title">Join the VAPE Community</h2>
+  <p class="auth-form__subtitle">Create an account to explore premium vaping gear</p>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-md" role="alert">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-group">
+      <label class="form-label" for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        class="form-input"
+        [class.is-invalid]="usernameCtrl.invalid && usernameCtrl.touched"
+        formControlName="username"
+        autocomplete="username"
+        aria-required="true"
+        [attr.aria-describedby]="usernameCtrl.invalid && usernameCtrl.touched ? 'username-error' : null"
+      />
+      @if (usernameCtrl.invalid && usernameCtrl.touched) {
+        <span id="username-error" class="form-error" role="alert">
+          @if (usernameCtrl.errors?.['required']) { Username is required. }
+          @else { Username must be at least 3 characters. }
+        </span>
+      }
+    </div>
+
+    <div class="form-group mt-md">
+      <label class="form-label" for="reg-email">Email address</label>
+      <input
+        id="reg-email"
+        type="email"
+        class="form-input"
+        [class.is-invalid]="emailCtrl.invalid && emailCtrl.touched"
+        formControlName="email"
+        autocomplete="email"
+        aria-required="true"
+        [attr.aria-describedby]="emailCtrl.invalid && emailCtrl.touched ? 'reg-email-error' : null"
+      />
+      @if (emailCtrl.invalid && emailCtrl.touched) {
+        <span id="reg-email-error" class="form-error" role="alert">
+          @if (emailCtrl.errors?.['required']) { Email is required. }
+          @else { Enter a valid email address. }
+        </span>
+      }
+    </div>
+
+    <div class="form-group mt-md">
+      <label class="form-label" for="reg-password">Password</label>
+      <input
+        id="reg-password"
+        type="password"
+        class="form-input"
+        [class.is-invalid]="passwordCtrl.invalid && passwordCtrl.touched"
+        formControlName="password"
+        autocomplete="new-password"
+        aria-required="true"
+        [attr.aria-describedby]="passwordCtrl.invalid && passwordCtrl.touched ? 'reg-password-error' : 'reg-password-hint'"
+      />
+      @if (passwordCtrl.invalid && passwordCtrl.touched) {
+        <span id="reg-password-error" class="form-error" role="alert">
+          @if (passwordCtrl.errors?.['required']) { Password is required. }
+          @else { Password must be at least 8 characters. }
+        </span>
+      } @else {
+        <span id="reg-password-hint" class="form-hint">Must be at least 8 characters.</span>
+      }
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary btn-full mt-lg"
+      style="background-color: var(--color-primary); box-shadow: 0 4px 14px rgba(178,58,235,0.4);"
+      [disabled]="loading()"
+      aria-live="polite"
+    >
+      @if (loading()) {
+        <span class="spinner" style="width:18px;height:18px;" aria-hidden="true"></span>
+        Creating account…
+      } @else {
+        Create account
+      }
+    </button>
+  </form>
+
+  <p class="auth-form__footer">
+    Already have an account?
+    <a routerLink="/auth/login" class="auth-form__link">Sign in</a>
+  </p>
+</section>

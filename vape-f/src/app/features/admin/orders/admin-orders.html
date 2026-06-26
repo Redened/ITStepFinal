@@ -1,0 +1,109 @@
+<div class="admin-page">
+  <app-page-header title="Orders" subtitle="Review orders and update their fulfillment status." />
+
+  <div class="filters" role="group" aria-label="Filter by order status">
+    @for (opt of statusOptions; track opt.label) {
+      <button
+        type="button"
+        class="filters__btn"
+        [class.filters__btn--active]="selectedStatus() === opt.value"
+        (click)="filterByStatus(opt.value)"
+      >{{ opt.label }}</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="admin-skeleton" role="status" aria-label="Loading orders" aria-busy="true">
+      @for (s of [0, 1, 2, 3, 4, 5]; track s) {
+        <app-skeleton shape="line" height="48px" />
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="alert alert-danger admin-page__error" role="alert">
+      <span>Couldn't load orders.</span>
+      <button type="button" class="btn btn-sm btn-secondary" (click)="loadOrders(currentPage())">Try again</button>
+    </div>
+  } @else if (isEmpty()) {
+    <app-empty-state title="No orders found" message="No orders match the current filter." />
+  } @else {
+    <div class="table-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div class="table-actions" style="display: flex; gap: 8px;">
+        <button class="btn btn-sm btn-secondary" disabled>Delete Selected</button>
+        <button class="btn btn-sm btn-secondary" disabled>Mark as Shipped</button>
+      </div>
+      <div class="table-search">
+        <input type="text" class="form-input form-input--compact" placeholder="Search orders..." style="width: 200px;" />
+      </div>
+    </div>
+    <div class="table-wrapper" role="region" aria-label="Orders table" tabindex="0">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 40px; text-align: center;">
+              <input type="checkbox" aria-label="Select all orders" />
+            </th>
+            <th scope="col" class="admin-table__num">ID</th>
+            <th scope="col">Placed</th>
+            <th scope="col">Ship to</th>
+            <th scope="col" class="admin-table__num">Items</th>
+            <th scope="col" class="admin-table__num">Total</th>
+            <th scope="col">Status</th>
+            <th scope="col">Update Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order.id) {
+            <tr>
+              <td style="text-align: center;">
+                <input type="checkbox" [attr.aria-label]="'Select order ' + order.id" />
+              </td>
+              <td class="admin-table__num" data-label="ID">#{{ order.id }}</td>
+              <td data-label="Placed">{{ order.createdAt | date:'mediumDate' }}</td>
+              <td class="ship-cell" data-label="Ship to">{{ order.shippingAddress || '—' }}</td>
+              <td class="admin-table__num" data-label="Items">{{ (order.orderItems ?? []).length }}</td>
+              <td class="admin-table__num" data-label="Total">{{ order.totalAmount | currency }}</td>
+              <td data-label="Status">
+                <span class="badge" [class]="statusBadgeClass(order.status)">
+                  {{ statusLabel(order.status) }}
+                </span>
+              </td>
+              <td class="admin-table__actions" data-label="Update Status">
+                <select
+                  class="form-input form-input--compact"
+                  [disabled]="actionLoadingId() === order.id"
+                  [attr.aria-label]="'Set status for order ' + order.id"
+                  (change)="onStatusSelect(order, $event)"
+                >
+                  @for (s of allStatuses; track s) {
+                    <option [value]="s" [selected]="order.status === s">{{ statusLabel(s) }}</option>
+                  }
+                </select>
+                @if (actionLoadingId() === order.id) {
+                  <span class="saving-indicator" aria-live="polite">Saving…</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>
+
+<app-confirm-dialog
+  [open]="pendingStatus() !== null"
+  title="Update order status"
+  [message]="statusDialog()?.message ?? ''"
+  [confirmLabel]="statusDialog()?.confirmLabel ?? 'Confirm'"
+  [variant]="statusDialog()?.variant ?? 'primary'"
+  cancelLabel="Keep current"
+  [loading]="actionLoadingId() !== null"
+  (confirmed)="confirmStatus()"
+  (cancelled)="cancelStatus()"
+/>

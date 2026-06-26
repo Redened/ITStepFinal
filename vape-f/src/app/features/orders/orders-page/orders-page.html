@@ -1,0 +1,156 @@
+<div class="orders-page container">
+  <h1 class="orders-page__heading">My Orders</h1>
+
+  <nav class="orders-page__tabs" aria-label="Filter orders by status">
+    @for (opt of statusOptions; track opt.label) {
+      <button
+        type="button"
+        class="orders-page__tab"
+        [class.orders-page__tab--active]="selectedStatus() === opt.value"
+        (click)="filterByStatus(opt.value)"
+        [attr.aria-pressed]="selectedStatus() === opt.value"
+      >{{ opt.label }}</button>
+    }
+  </nav>
+
+  @if (actionError()) {
+    <div class="alert alert-danger mb-md" role="alert" aria-live="assertive">{{ actionError() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page-loader" role="status" aria-label="Loading orders">
+      <span class="spinner"></span>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  } @else if (isEmpty()) {
+    <app-empty-state
+      title="No orders yet"
+      [message]="selectedStatus() === null ? 'Your order history will appear here.' : 'No orders match this filter.'"
+      ctaLabel="Browse products"
+      ctaLink="/products"
+    >
+      <svg empty-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+    </app-empty-state>
+  } @else {
+    <ul class="orders-list" aria-label="Order list">
+      @for (order of orders(); track order.id) {
+        <li
+          class="order-card card"
+          [class.order-card--loading]="actionLoadingId() === order.id"
+          aria-label="Order {{ order.id }}"
+        >
+          <div class="order-card__header">
+            <div class="order-card__meta">
+              <span class="order-card__id">Order #{{ order.id }}</span>
+              @if (order.status != null) {
+                <span class="badge" [class]="statusBadgeClass(order.status)">
+                  {{ statusLabel(order.status) }}
+                </span>
+              }
+              <span class="order-card__date text-muted">{{ order.createdAt | date: 'mediumDate' }}</span>
+            </div>
+            <span class="order-card__total">{{ orderTotal(order) | currency }}</span>
+          </div>
+
+          @if (isCancelled(order)) {
+            <p class="order-card__cancelled" role="status">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              This order was cancelled.
+            </p>
+          } @else {
+            <ol class="order-timeline" [attr.aria-label]="'Order status: ' + statusLabel(order.status)">
+              @for (step of timeline(order); track step.label) {
+                <li
+                  class="order-timeline__step"
+                  [class.order-timeline__step--done]="step.state === 'done'"
+                  [class.order-timeline__step--current]="step.state === 'current'"
+                  [attr.aria-current]="step.state === 'current' ? 'step' : null"
+                >
+                  <span class="order-timeline__dot" aria-hidden="true"></span>
+                  <span class="order-timeline__label">{{ step.label }}</span>
+                </li>
+              }
+            </ol>
+          }
+
+          <div class="order-card__details">
+            @if (order.shippingAddress) {
+              <span class="order-card__detail">
+                <span class="text-muted">Ship to:</span> {{ order.shippingAddress }}
+              </span>
+            }
+          </div>
+
+          <div class="order-card__items" aria-label="Items in order {{ order.id }}">
+            @for (item of (order.orderItems ?? []).slice(0, 4); track item.id) {
+              <div class="order-item">
+                <img
+                  [ngSrc]="imageSrc(item.product.image)"
+                  [alt]="item.product.title || 'Product'"
+                  class="order-item__image"
+                  width="52"
+                  height="52"
+                />
+                <div class="order-item__info">
+                  <span class="order-item__title">{{ item.product.title }}</span>
+                  <span class="order-item__meta">
+                    {{ (item.price || item.product.price) | currency }} × {{ item.quantity }}
+                  </span>
+                </div>
+                <span class="order-item__subtotal">{{ item.quantity * (item.price || item.product.price) | currency }}</span>
+              </div>
+            }
+            @if ((order.orderItems?.length ?? 0) > 4) {
+              <p class="order-card__more text-muted">
+                +{{ (order.orderItems?.length ?? 0) - 4 }} more item{{ (order.orderItems?.length ?? 0) - 4 > 1 ? 's' : '' }}
+              </p>
+            }
+          </div>
+
+          @if (canConfirm(order) || canCancel(order)) {
+            <div class="order-card__actions">
+              @if (canConfirm(order)) {
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="requestAction('confirm', order.id)"
+                  [disabled]="actionLoadingId() === order.id"
+                >Confirm order</button>
+              }
+              @if (canCancel(order)) {
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="requestAction('cancel', order.id)"
+                  [disabled]="actionLoadingId() === order.id"
+                >Cancel</button>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+
+    <div class="orders-page__pagination">
+      <app-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        (pageChange)="onPageChange($event)"
+      />
+    </div>
+  }
+
+  @if (dialogConfig(); as cfg) {
+    <app-confirm-dialog
+      [open]="pendingAction() !== null"
+      [title]="cfg.title"
+      [message]="cfg.message"
+      [confirmLabel]="cfg.confirmLabel"
+      [variant]="cfg.variant"
+      [loading]="actionLoadingId() !== null"
+      (confirmed)="onActionConfirmed()"
+      (cancelled)="onActionCancelled()"
+    />
+  }
+</div>

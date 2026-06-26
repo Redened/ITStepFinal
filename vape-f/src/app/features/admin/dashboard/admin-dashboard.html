@@ -1,0 +1,114 @@
+<div class="admin-page">
+  @if (loading()) {
+    <div class="dashboard__layout">
+      <div class="dashboard__main">
+        <div class="overview-grid">
+          @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
+            <div class="overview-metric glass-card">
+              <app-skeleton shape="block" height="60px" />
+            </div>
+          }
+        </div>
+      </div>
+      <div class="dashboard__panel card glass-card">
+        <app-skeleton shape="card" height="400px" />
+      </div>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  } @else if (data(); as d) {
+    <div class="dashboard__layout">
+      <div class="dashboard__main">
+        <div class="overview-grid">
+          <!-- Metric Cards -->
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Total Sales</div>
+            <div class="metric-value text-success">{{ (d.totalSales | currency) ?? '—' }}</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Orders</div>
+            <div class="metric-value text-accent">{{ d.totalOrders }}</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Pending</div>
+            <div class="metric-value text-warning">{{ d.pendingOrders }}</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Products</div>
+            <div class="metric-value text-info">{{ d.totalProducts }}</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Active Visitors</div>
+            <div class="metric-value text-success">142</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Conversion Rate</div>
+            <div class="metric-value text-accent">3.8%</div>
+          </div>
+          <div class="overview-metric glass-card">
+            <div class="metric-label">Avg Order Value</div>
+            <div class="metric-value text-warning">{{ (d.totalOrders > 0 ? (d.totalSales / d.totalOrders) : 0) | currency }}</div>
+          </div>
+
+          <!-- Top Selling Product -->
+          @if (topProductBars().length > 0) {
+            <div class="overview-metric glass-card">
+              <div class="metric-label">Top Selling Product</div>
+              <div class="metric-value text-accent" style="font-size: 1.4rem; white-space: normal; line-height: 1.2;">
+                {{ topProductBars()[0].title || 'Untitled product' }}
+              </div>
+              <div class="metric-label" style="margin-top: auto; color: var(--vibrant-accent);">
+                {{ topProductBars()[0].unitsSold }} units sold
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <section class="dashboard__panel card glass-card" aria-label="Live Activity Feed">
+        <div class="dashboard__panel-header">
+          <h2 class="dashboard__panel-title">Live Activity</h2>
+          <span class="live-indicator"></span>
+        </div>
+        <ul class="activity-feed">
+          <li class="activity-item">
+            <div class="activity-icon bg-success">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="activity-content">
+              <p><strong>New Order #1042</strong> placed by John Doe.</p>
+              <span class="activity-time">2 mins ago</span>
+            </div>
+          </li>
+          <li class="activity-item">
+            <div class="activity-icon bg-warning">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>
+            </div>
+            <div class="activity-content">
+              <p><strong>Stock Alert</strong>: Mango Ice is running low (2 left).</p>
+              <span class="activity-time">15 mins ago</span>
+            </div>
+          </li>
+          <li class="activity-item">
+            <div class="activity-icon bg-info">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="activity-content">
+              <p><strong>New User</strong>: Jane Smith registered.</p>
+              <span class="activity-time">1 hour ago</span>
+            </div>
+          </li>
+          <li class="activity-item">
+            <div class="activity-icon bg-accent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div class="activity-content">
+              <p><strong>Order #1030</strong> shipped successfully.</p>
+              <span class="activity-time">3 hours ago</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </div>
+  }
+</div>

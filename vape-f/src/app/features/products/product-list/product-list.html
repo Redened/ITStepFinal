@@ -1,0 +1,150 @@
+<div class="product-list">
+  <div class="product-list__top-bar container" style="justify-content: space-between;">
+    <p class="product-list__count" aria-live="polite" aria-atomic="true" style="margin: 0; font-size: 1.1rem; color: var(--color-text-muted);">
+      @if (!loading()) {
+        {{ totalCount() }} product{{ totalCount() !== 1 ? 's' : '' }} found
+      }
+    </p>
+    <button
+      class="btn btn-secondary btn-sm product-list__filter-toggle"
+      (click)="toggleSidebar()"
+      [attr.aria-expanded]="sidebarOpen()"
+      aria-controls="filter-sidebar"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filters
+      @if (hasActiveFilters()) {
+        <span class="product-list__filter-count" aria-label="active filters">{{ activeChips().length }}</span>
+      }
+    </button>
+  </div>
+
+  <div class="container product-list__body">
+    <aside
+      id="filter-sidebar"
+      class="product-list__sidebar"
+      [class.product-list__sidebar--open]="sidebarOpen()"
+      aria-label="Product filters"
+    >
+      <div class="product-list__sidebar-header">
+        <h2 class="product-list__sidebar-title">Filters</h2>
+        <button
+          class="btn btn-ghost btn-sm"
+          (click)="clearFilters()"
+          aria-label="Clear all filters"
+        >Clear all</button>
+      </div>
+
+      <form [formGroup]="filterForm" aria-label="Filter products">
+        <div class="product-list__sidebar-categories mt-md">
+          <label class="form-label">Category</label>
+          <div class="category-stack mt-sm">
+            <button 
+              type="button"
+              class="category-square"
+              [class.category-square--active]="filterForm.controls.CategoryId.value === null"
+              (click)="filterForm.controls.CategoryId.setValue(null)"
+            >
+              <div class="category-square__img-wrapper">
+                <span class="category-square__all-icon">All</span>
+              </div>
+              <span class="category-square__name">All Categories</span>
+            </button>
+            @for (cat of categories(); track cat.id) {
+              <button 
+                type="button"
+                class="category-square" 
+                [class.category-square--active]="filterForm.controls.CategoryId.value === cat.id"
+                (click)="filterForm.controls.CategoryId.setValue(cat.id)"
+              >
+                <div class="category-square__img-wrapper">
+                  <img [ngSrc]="cat.imageUrl || '/assets/placeholder.png'" [alt]="cat.name" width="48" height="48" class="category-square__img" />
+                </div>
+                <span class="category-square__name">{{ cat.name }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <fieldset class="product-list__price-range mt-md">
+          <legend class="form-label">Price range</legend>
+          <div class="dual-slider">
+            <div class="dual-slider-track">
+              <div class="dual-slider-fill" [style.left.%]="minPricePercent()" [style.right.%]="maxPricePercent()"></div>
+            </div>
+            <input type="range" class="dual-slider-input dual-slider-input--min" min="0" [max]="maxSliderValue" formControlName="MinPrice" aria-label="Minimum price" />
+            <input type="range" class="dual-slider-input dual-slider-input--max" min="0" [max]="maxSliderValue" formControlName="MaxPrice" aria-label="Maximum price" />
+          </div>
+          <div class="dual-slider-values">
+            <span>${{ filterForm.controls.MinPrice.value ?? 0 }}</span>
+            <span>${{ filterForm.controls.MaxPrice.value ?? maxSliderValue }}</span>
+          </div>
+        </fieldset>
+      </form>
+    </aside>
+
+    <section class="product-list__main" aria-label="Products">
+
+      @if (hasActiveFilters()) {
+        <div class="product-list__chips" aria-label="Active filters">
+          @for (chip of activeChips(); track chip.key) {
+            <button
+              type="button"
+              class="product-list__chip"
+              (click)="removeFilter(chip.key)"
+              [attr.aria-label]="'Remove filter ' + chip.label"
+            >
+              <span class="product-list__chip-label">{{ chip.label }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          }
+          <button type="button" class="product-list__chips-clear" (click)="clearFilters()">
+            Clear all
+          </button>
+        </div>
+      }
+
+      @if (loading()) {
+        <div class="product-list__grid" role="status" aria-label="Loading products">
+          @for (s of skeletons; track $index) {
+            <app-product-card-skeleton />
+          }
+        </div>
+      } @else if (error()) {
+        <div class="alert alert-danger" role="alert">{{ error() }}</div>
+      } @else if (products().length === 0) {
+        @if (hasActiveFilters()) {
+          <app-empty-state
+            title="No products match your filters"
+            message="Try adjusting your search or price range, or clear the filters to see everything."
+            ctaLabel="Clear filters"
+            (ctaClick)="clearFilters()"
+          >
+            <svg empty-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            title="No products yet"
+            message="There are no products to show right now. Please check back soon."
+          >
+            <svg empty-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7l1.5 12.5a2 2 0 0 0 2 1.5h11a2 2 0 0 0 2-1.5L21 7"/><path d="M3 7h18"/><path d="M8 7a4 4 0 0 1 8 0"/></svg>
+          </app-empty-state>
+        }
+      } @else {
+        <div class="product-list__grid">
+          @for (product of products(); track product.id) {
+            <app-product-card [product]="product" />
+          }
+        </div>
+
+        <div class="product-list__pagination">
+          <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    </section>
+  </div>
+</div>

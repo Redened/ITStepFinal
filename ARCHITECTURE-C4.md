@@ -1,6 +1,6 @@
-# ALTA — Architecture (C4 Model)
+# VAPE — Architecture (C4 Model)
 
-This document describes the architecture of the ALTA e-commerce platform using the
+This document describes the architecture of the VAPE e-commerce platform using the
 [C4 model](https://c4model.com/): a hierarchy of diagrams that zoom in from system
 context, to containers, to the components inside the API.
 
@@ -11,15 +11,15 @@ GitHub.
 
 ## Level 1 — System Context
 
-Who uses ALTA and what it talks to.
+Who uses VAPE and what it talks to.
 
 ```mermaid
 graph TD
     customer["👤 Customer<br/><i>Browses, orders, manages account</i>"]
     staff["👤 Admin / Manager<br/><i>Manages catalog, orders, users</i>"]
 
-    subgraph alta[" "]
-        system["🛒 ALTA E-Commerce Platform<br/><i>Catalog, cart, orders, accounts, admin</i>"]
+    subgraph vape[" "]
+        system["🛒 VAPE E-Commerce Platform<br/><i>Catalog, cart, orders, accounts, admin</i>"]
     end
 
     smtp["✉️ Email Provider (SMTP)<br/><i>Gmail — verification & reset codes</i>"]
@@ -50,7 +50,7 @@ The deployable/runnable parts and how they communicate.
 graph TD
     user["👤 User (browser)"]
 
-    subgraph platform["ALTA Platform"]
+    subgraph platform["VAPE Platform"]
         spa["🅰️ Web App (SPA)<br/><b>Angular 21</b><br/><i>UI, routing, state (signals)</i>"]
         api["🌐 REST API<br/><b>ASP.NET Core 8</b><br/><i>Business logic, auth, validation</i>"]
         db[("🗄️ Database<br/><b>SQL Server</b><br/><i>EF Core schema</i>")]

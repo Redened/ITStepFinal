@@ -1,6 +1,0 @@
-@ALTA_HostAddress = http://localhost:5113
-
-GET {{ALTA_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

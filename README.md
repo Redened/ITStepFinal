@@ -1,9 +1,9 @@
-# ALTA — E-Commerce Platform
+# VAPE — E-Commerce Platform
 
 A full-stack e-commerce platform: a product catalog with categories, search & filtering, a shopping cart, order management with status tracking, user accounts with email verification, and a role-based admin panel.
 
-- **Backend** (`alta-b/`) — ASP.NET Core 8 Web API, Entity Framework Core, SQL Server, JWT auth.
-- **Frontend** (`alta-f/`) — Angular 21 (standalone components, signals), custom SCSS design system.
+- **Backend** (`vape-b/`) — ASP.NET Core 8 Web API, Entity Framework Core, SQL Server, JWT auth.
+- **Frontend** (`vape-f/`) — Angular 21 (standalone components, signals), custom SCSS design system.
 
 > The original assignment specification is preserved in [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md).
 > Architecture is documented with the C4 model in [`docs/ARCHITECTURE-C4.md`](docs/ARCHITECTURE-C4.md).
@@ -28,7 +28,7 @@ A full-stack e-commerce platform: a product catalog with categories, search & fi
 
 ```
 .
-├── alta-b/                 # ASP.NET Core Web API
+├── vape-b/                 # ASP.NET Core Web API
 │   ├── Controllers/        # API endpoints
 │   ├── Services/           # Business logic (one folder per domain)
 │   ├── Models/             # EF Core entities
@@ -40,12 +40,12 @@ A full-stack e-commerce platform: a product catalog with categories, search & fi
 │   ├── Extensions/         # DI & pipeline wiring
 │   ├── Common/             # Cross-cutting: Result<T>, middleware, JWT, SMTP, validation
 │   └── Scripts/            # SQL schema + seed scripts
-├── alta-f/                 # Angular 21 SPA
+├── vape-f/                 # Angular 21 SPA
 │   └── src/app/
 │       ├── core/           # guards, interceptors, app-wide services
 │       ├── features/       # auth, products, cart, orders, profile, admin
 │       └── shared/         # components & models
-├── ALTA.Tests/             # xUnit backend test project
+├── VAPE.Tests/             # xUnit backend test project
 └── docs/                   # REQUIREMENTS.md (spec), ARCHITECTURE-C4.md
 ```
 
@@ -62,7 +62,7 @@ A full-stack e-commerce platform: a product catalog with categories, search & fi
 ## Backend setup & run
 
 ```bash
-cd alta-b
+cd vape-b
 
 # 1. Configure secrets (see "Configuration & secrets" below)
 dotnet user-secrets set "Smtp:Email"    "you@gmail.com"
@@ -85,7 +85,7 @@ Swagger UI is available at `http://localhost:5113/swagger` in Development.
 ## Frontend setup & run
 
 ```bash
-cd alta-f
+cd vape-f
 
 pnpm install
 pnpm start            # ng serve -> http://localhost:4200
@@ -97,14 +97,14 @@ The frontend reads the API base URL from `src/environments/environment.ts`
 Build for production:
 
 ```bash
-pnpm build            # outputs to dist/alta-f
+pnpm build            # outputs to dist/vape-f
 ```
 
 ---
 
 ## Configuration & secrets
 
-Backend configuration lives in `alta-b/appsettings.json`. **No real secrets are
+Backend configuration lives in `vape-b/appsettings.json`. **No real secrets are
 committed.** Sensitive values are supplied at runtime via
 [.NET user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets)
 (loaded automatically in the Development environment) or environment variables.
@@ -119,7 +119,7 @@ committed.** Sensitive values are supplied at runtime via
 Set secrets locally:
 
 ```bash
-cd alta-b
+cd vape-b
 dotnet user-secrets set "Smtp:Email"    "you@gmail.com"
 dotnet user-secrets set "Smtp:Password" "your-app-password"
 ```
@@ -234,10 +234,10 @@ Full, always-current documentation is available via Swagger UI.
 
 ```bash
 # Backend (xUnit + EF InMemory)
-dotnet test ALTA.Tests/ALTA.Tests.csproj
+dotnet test VAPE.Tests/VAPE.Tests.csproj
 
 # Frontend (Vitest)
-cd alta-f && pnpm test
+cd vape-f && pnpm test
 ```
 
 ---
