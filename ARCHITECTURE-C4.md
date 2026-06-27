@@ -10,19 +10,20 @@
 Defines the external actors and their boundaries relative to the VAPE platform.
 
 ```mermaid
-graph TD
-    customer["👤 Customer<br/><i>Browses, orders, manages account</i>"]
-    staff["👤 Admin / Manager<br/><i>Manages catalog, orders, users</i>"]
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#0f172a', 'edgeLabelBackground':'#1e293b', 'tertiaryColor': '#334155'}}}%%
+graph LR
+    customer(["👤 Customer<br/><i>Browses, orders, manages account</i>"])
+    staff(["👤 Admin / Manager<br/><i>Manages catalog, orders, users</i>"])
 
-    subgraph vape[" "]
-        system["🛒 VAPE E-Commerce Platform<br/><i>Catalog, cart, orders, accounts, admin</i>"]
+    subgraph vape ["☁️ Hosted Environment"]
+        system{{"🛒 VAPE E-Commerce Platform<br/><i>Catalog, cart, orders, accounts, admin</i>"}}
     end
 
-    smtp["✉️ External: SMTP<br/><i>Gmail Delivery System</i>"]
+    smtp>["✉️ External: SMTP<br/><i>Gmail Delivery System</i>"]
 
-    customer -->|"Uses (HTTPS)"| system
-    staff -->|"Manages (HTTPS)"| system
-    system -->|"Dispatches Mail"| smtp
+    customer ==>|"Uses (HTTPS)"| system
+    staff ==>|"Manages (HTTPS)"| system
+    system -.->|"Dispatches Mail"| smtp
 ```
 
 ---
@@ -32,21 +33,23 @@ graph TD
 The logical deployment nodes and their communication vectors.
 
 ```mermaid
-graph TD
-    user["👤 User (Browser)"]
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e1e2f', 'tertiaryColor': '#2d2d44'}}}%%
+graph LR
+    user((👤 User Browser))
 
-    subgraph platform["VAPE Ecosystem"]
-        spa["🅰️ SPA Client<br/><b>Angular 21</b><br/><i>UI & State Signals</i>"]
+    subgraph platform ["VAPE Ecosystem"]
+        direction TB
+        spa{{"🅰️ SPA Client<br/><b>Angular 21</b><br/><i>UI & State Signals</i>"}}
         api["🌐 REST Gateway<br/><b>ASP.NET Core 8</b><br/><i>Auth & Logic Rules</i>"]
         db[("🗄️ Relational DB<br/><b>SQL Server</b><br/><i>EF Core Persistence</i>")]
     end
 
-    smtp["✉️ Gmail (SMTP)"]
+    smtp>["✉️ Gmail (SMTP)"]
 
-    user -->|"HTTPS"| spa
-    spa -->|"JSON / HTTPS / JWT"| api
-    api -->|"TDS Protocol"| db
-    api -->|"SMTP Relay"| smtp
+    user == "HTTPS" ==> spa
+    spa -. "JSON / HTTPS / JWT" .-> api
+    api == "TDS Protocol" ==> db
+    api -. "SMTP Relay" .-> smtp
 ```
 
 | Node | Technology | Primary Function |
@@ -62,12 +65,14 @@ graph TD
 Internal dependency graph of the `.NET Core` REST Gateway.
 
 ```mermaid
-graph TD
-    subgraph api["REST Gateway Internals"]
-        mw["ExceptionMiddleware<br/><i>Global Error Trap</i>"]
-        authmw["Authorization Pipeline<br/><i>JWT & Policy Enforcement</i>"]
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#0d1117', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#30363d', 'lineColor': '#8b949e', 'secondaryColor': '#161b22', 'tertiaryColor': '#21262d'}}}%%
+graph LR
+    subgraph api ["REST Gateway Internals"]
+        direction TB
+        mw("ExceptionMiddleware<br/><i>Global Error Trap</i>")
+        authmw{"Authorization Pipeline<br/><i>JWT & Policy Enforcement</i>"}
 
-        subgraph controllers["HTTP Controllers"]
+        subgraph controllers ["HTTP Controllers"]
             authC["Auth"]
             prodC["Products"]
             catC["Categories"]
@@ -77,7 +82,7 @@ graph TD
             adminC["Admin"]
         end
 
-        subgraph services["Domain Services"]
+        subgraph services ["Domain Services"]
             authS["Auth Service"]
             prodS["Product Service"]
             catS["Category Service"]
@@ -87,15 +92,15 @@ graph TD
             adminS["Admin Service"]
         end
 
-        subgraph cross["Shared Infrastructure"]
-            validators["FluentValidation"]
-            mapper["AutoMapper"]
-            jwt["JwtGenerator"]
-            smtpS["SmtpClient"]
-            result["Result&lt;T&gt; Wrapper"]
+        subgraph cross ["Shared Infrastructure"]
+            validators[["FluentValidation"]]
+            mapper[["AutoMapper"]]
+            jwt[["JwtGenerator"]]
+            smtpS[["SmtpClient"]]
+            result>["Result&lt;T&gt; Wrapper"]
         end
 
-        ctx["DataContext<br/><i>EF Core Graph</i>"]
+        ctx[("DataContext<br/><i>EF Core Graph</i>")]
     end
 
     db[("SQL Server")]
@@ -109,12 +114,12 @@ graph TD
     userC --> userS
     adminC --> adminS
 
-    services --> validators
-    services --> mapper
-    services --> ctx
-    authS --> jwt
-    authS --> smtpS
-    ctx --> db
+    services -.-> validators
+    services -.-> mapper
+    services === ctx
+    authS -.-> jwt
+    authS -.-> smtpS
+    ctx === db
 ```
 
 ---
@@ -122,15 +127,19 @@ graph TD
 ## 🔄 Transaction Lifecycle: Checkout Sequence
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
-    participant SPA as Angular Client
-    participant API as OrdersController
-    participant SRV as OrderServices
+    autonumber
+    actor SPA as Angular Client
+    box rgb(30, 41, 59) ASP.NET Core API
+        participant API as OrdersController
+        participant SRV as OrderServices
+    end
     participant DB as SQL Database
 
-    SPA->>API: POST /checkout (JWT Attached)
+    SPA->>+API: POST /checkout (JWT Attached)
     API->>API: Assert Authorization Policy
-    API->>SRV: Dispatch Checkout(userId)
+    API->>+SRV: Dispatch Checkout(userId)
     SRV->>DB: Query Cart + Inventory Locks
     
     alt Verification Failure (No Stock)
@@ -138,8 +147,8 @@ sequenceDiagram
         API-->>SPA: HTTP 400
     else Verification Success
         SRV->>DB: Mutate Stock, Create Order, Flush Cart
-        SRV-->>API: Result.Ok(orderId)
-        API-->>SPA: HTTP 200 { id }
+        SRV-->>-API: Result.Ok(orderId)
+        API-->>-SPA: HTTP 200 { id }
     end
 ```
 
@@ -148,6 +157,7 @@ sequenceDiagram
 ## 💾 Relational Data Topography
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 erDiagram
     User ||--|| UserDetails : configures
     User ||--o{ Order : authorizes
