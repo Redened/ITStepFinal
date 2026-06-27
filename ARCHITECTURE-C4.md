@@ -19,7 +19,7 @@ graph LR
         system{{"🛒 VAPE E-Commerce Platform<br/><i>Catalog, cart, orders, accounts, admin</i>"}}
     end
 
-    smtp>["✉️ External: SMTP<br/><i>Gmail Delivery System</i>"]
+    smtp[/"✉️ External: SMTP<br/><i>Gmail Delivery System</i>"/]
 
     customer ==>|"Uses (HTTPS)"| system
     staff ==>|"Manages (HTTPS)"| system
@@ -44,7 +44,7 @@ graph LR
         db[("🗄️ Relational DB<br/><b>SQL Server</b><br/><i>EF Core Persistence</i>")]
     end
 
-    smtp>["✉️ Gmail (SMTP)"]
+    smtp[/"✉️ Gmail (SMTP)"/]
 
     user == "HTTPS" ==> spa
     spa -. "JSON / HTTPS / JWT" .-> api
@@ -97,7 +97,7 @@ graph LR
             mapper[["AutoMapper"]]
             jwt[["JwtGenerator"]]
             smtpS[["SmtpClient"]]
-            result>["Result&lt;T&gt; Wrapper"]
+            result[/"Result&lt;T&gt; Wrapper"/]
         end
 
         ctx[("DataContext<br/><i>EF Core Graph</i>")]
