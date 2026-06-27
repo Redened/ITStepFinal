@@ -1,5 +1,5 @@
 <div class="admin-page">
-  <app-page-header title="Orders" subtitle="Review orders and update their fulfillment status." />
+  <app-page-header></app-page-header>
 
   <div class="filters" role="group" aria-label="Filter by order status">
     @for (opt of statusOptions; track opt.label) {
@@ -26,11 +26,7 @@
   } @else if (isEmpty()) {
     <app-empty-state title="No orders found" message="No orders match the current filter." />
   } @else {
-    <div class="table-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <div class="table-actions" style="display: flex; gap: 8px;">
-        <button class="btn btn-sm btn-secondary" disabled>Delete Selected</button>
-        <button class="btn btn-sm btn-secondary" disabled>Mark as Shipped</button>
-      </div>
+    <div class="table-toolbar" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
       <div class="table-search">
         <input type="text" class="form-input form-input--compact" placeholder="Search orders..." style="width: 200px;" />
       </div>
@@ -39,9 +35,6 @@
       <table class="admin-table">
         <thead>
           <tr>
-            <th scope="col" style="width: 40px; text-align: center;">
-              <input type="checkbox" aria-label="Select all orders" />
-            </th>
             <th scope="col" class="admin-table__num">ID</th>
             <th scope="col">Placed</th>
             <th scope="col">Ship to</th>
@@ -54,10 +47,7 @@
         <tbody>
           @for (order of orders(); track order.id) {
             <tr>
-              <td style="text-align: center;">
-                <input type="checkbox" [attr.aria-label]="'Select order ' + order.id" />
-              </td>
-              <td class="admin-table__num" data-label="ID">#{{ order.id }}</td>
+              <td class="admin-table__num" data-label="ID">{{ order.id }}</td>
               <td data-label="Placed">{{ order.createdAt | date:'mediumDate' }}</td>
               <td class="ship-cell" data-label="Ship to">{{ order.shippingAddress || '—' }}</td>
               <td class="admin-table__num" data-label="Items">{{ (order.orderItems ?? []).length }}</td>

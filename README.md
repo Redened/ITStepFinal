@@ -1,254 +1,113 @@
-# VAPE — E-Commerce Platform
+# 🌐 VAPE — Enterprise E-Commerce Platform
 
-A full-stack e-commerce platform: a product catalog with categories, search & filtering, a shopping cart, order management with status tracking, user accounts with email verification, and a role-based admin panel.
+> [!NOTE]
+> A comprehensive, full-stack e-commerce solution featuring a scalable catalog, robust cart mechanics, order lifecycle tracking, strict role-based access control, and a modern, high-performance UI.
 
-- **Backend** (`vape-b/`) — ASP.NET Core 8 Web API, Entity Framework Core, SQL Server, JWT auth.
-- **Frontend** (`vape-f/`) — Angular 21 (standalone components, signals), custom SCSS design system.
+## 🏗️ System Overview
 
-> The original assignment specification is preserved in [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md).
-> Architecture is documented with the C4 model in [`docs/ARCHITECTURE-C4.md`](docs/ARCHITECTURE-C4.md).
+| Subsystem | Stack | Path | Description |
+|-----------|-------|------|-------------|
+| **Backend** | `ASP.NET Core 8 Web API` | `vape-b/` | C#, EF Core 8, SQL Server, JWT, FluentValidation |
+| **Frontend** | `Angular 21` | `vape-f/` | Standalone, Signals, RxJS, Custom SCSS |
 
----
-
-## Tech stack
-
-| Layer    | Technology |
-|----------|------------|
-| Backend  | C#, ASP.NET Core 8, Entity Framework Core 8, SQL Server |
-| Auth     | JWT bearer tokens, BCrypt password hashing, email verification (SMTP) |
-| Validation | FluentValidation (registered via DI) |
-| Mapping  | AutoMapper |
-| Docs     | Swagger / OpenAPI (Swashbuckle) |
-| Frontend | Angular 21, RxJS, Angular signals, Reactive Forms, SCSS |
-| Tests    | xUnit + EF InMemory (backend), Vitest (frontend) |
+> [!TIP]
+> - Original requirements: [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md)
+> - C4 Architecture: [`ARCHITECTURE-C4.md`](ARCHITECTURE-C4.md)
 
 ---
 
-## Repository layout
+## 🛠️ Repository Topography
 
-```
-.
-├── vape-b/                 # ASP.NET Core Web API
-│   ├── Controllers/        # API endpoints
-│   ├── Services/           # Business logic (one folder per domain)
-│   ├── Models/             # EF Core entities
-│   ├── DTOs/               # Request/response contracts
-│   ├── Validators/         # FluentValidation validators
-│   ├── Mappers/            # AutoMapper profiles
-│   ├── Data/               # DbContext
-│   ├── Migrations/         # EF Core migrations
-│   ├── Extensions/         # DI & pipeline wiring
-│   ├── Common/             # Cross-cutting: Result<T>, middleware, JWT, SMTP, validation
-│   └── Scripts/            # SQL schema + seed scripts
-├── vape-f/                 # Angular 21 SPA
-│   └── src/app/
-│       ├── core/           # guards, interceptors, app-wide services
-│       ├── features/       # auth, products, cart, orders, profile, admin
-│       └── shared/         # components & models
-├── VAPE.Tests/             # xUnit backend test project
-└── docs/                   # REQUIREMENTS.md (spec), ARCHITECTURE-C4.md
+```text
+📦 VAPE Monorepo
+ ┣ 📂 vape-b                 # Backend API (ASP.NET)
+ ┃ ┣ 📂 Controllers          # HTTP Endpoint Definitions
+ ┃ ┣ 📂 Services             # Vertical Slice Business Logic
+ ┃ ┣ 📂 Models               # EF Core Domain Entities
+ ┃ ┗ 📂 Migrations           # DB Schema Iterations
+ ┣ 📂 vape-f                 # Frontend SPA (Angular)
+ ┃ ┗ 📂 src/app
+ ┃   ┣ 📂 core               # Guards, Interceptors, App-State
+ ┃   ┣ 📂 features           # Lazy-Loaded Domains (Admin, Shop)
+ ┃   ┗ 📂 shared             # Reusable UI Components
+ ┗ 📂 VAPE.Tests             # xUnit Automated Verification
 ```
 
 ---
 
-## Prerequisites
+## 🚀 Deployment Operations
 
-- [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
-- [Node.js 20+](https://nodejs.org/) and [pnpm](https://pnpm.io/) (`npm i -g pnpm`)
-- SQL Server (LocalDB, Express, or full) — the default connection targets `localhost\SQLEXPRESS`
+### 1. Backend Initialization (`vape-b/`)
 
----
-
-## Backend setup & run
+> [!IMPORTANT]
+> The application uses `.NET User Secrets` to manage sensitive data. Never commit passwords.
 
 ```bash
 cd vape-b
 
-# 1. Configure secrets (see "Configuration & secrets" below)
-dotnet user-secrets set "Smtp:Email"    "you@gmail.com"
-dotnet user-secrets set "Smtp:Password" "<gmail-app-password>"
+# Inject SMTP configuration
+dotnet user-secrets set "Smtp:Email" "sys@gmail.com"
+dotnet user-secrets set "Smtp:Password" "app-password"
 
-# 2. Create / update the database from migrations
-dotnet ef database update          # or run Scripts/schema.sql manually
+# Synchronize Database Schema
+dotnet ef database update
 
-# 3. Run the API
+# Boot API Server
 dotnet run
 ```
+* **API Origin:** `http://localhost:5113`
+* **Swagger Interface:** `http://localhost:5113/swagger`
 
-The API starts on `http://localhost:5113` (see `Properties/launchSettings.json`).
-Swagger UI is available at `http://localhost:5113/swagger` in Development.
-
-> If `dotnet ef` is not found: `dotnet tool install --global dotnet-ef`.
-
----
-
-## Frontend setup & run
+### 2. Frontend Initialization (`vape-f/`)
 
 ```bash
 cd vape-f
 
+# Resolve dependencies and run dev server
 pnpm install
-pnpm start            # ng serve -> http://localhost:4200
+pnpm start
 ```
+* **Client Origin:** `http://localhost:4200`
+* *Target API is configured within `src/environments/environment.ts`.*
 
-The frontend reads the API base URL from `src/environments/environment.ts`
-(`apiUrl: 'http://localhost:5113'`). Update it if your API runs elsewhere.
+---
 
-Build for production:
+## 🔐 Security & Access Control
+
+Three distinct permission tiers are strictly enforced across the application lifecycle:
+
+1. **`User` (Level 0):** Standard consumer access. Can modify personal cart, address book, and track historical orders.
+2. **`Manager` (Level 2):** Operational staff. Capable of mutating catalog data (products, categories) and updating order fulfillment statuses.
+3. **`Admin` (Level 1):** System administrator. Inherits all Manager privileges, plus exclusive authority to dictate user roles and purge accounts.
+
+---
+
+## 📡 Core API Topography
+
+*All protected routes require a valid JWT Bearer token.*
+
+| Domain | Scope | Description |
+|--------|-------|-------------|
+| **`/api/auth`** | Public | Authentication, JWT provisioning, email validation. |
+| **`/api/products`** | Public | Catalog retrieval and dynamic filtering. |
+| **`/api/cart`** | 🔒 Auth | Ephemeral cart state mutation. |
+| **`/api/orders`** | 🔒 Auth | Checkout workflows and historical tracking. |
+| **`/api/admin`** | 🔒/👑 Elev | Catalog mutation, order status injection, role management. |
+
+---
+
+## 🧪 Validation Mechanics
 
 ```bash
-pnpm build            # outputs to dist/vape-f
-```
-
----
-
-## Configuration & secrets
-
-Backend configuration lives in `vape-b/appsettings.json`. **No real secrets are
-committed.** Sensitive values are supplied at runtime via
-[.NET user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets)
-(loaded automatically in the Development environment) or environment variables.
-
-| Key | Purpose | Where to set |
-|-----|---------|--------------|
-| `ConnectionStrings:Default` | SQL Server connection | `appsettings.json` (no secret) |
-| `Jwt:Key` | JWT signing key | `appsettings.json` (dev) / secret (prod) |
-| `Smtp:Email` / `Smtp:Password` | SMTP sender + app password | **user-secrets / env only** |
-| `Cors:AllowedOrigins` | Allowed frontend origins | `appsettings.json` |
-
-Set secrets locally:
-
-```bash
-cd vape-b
-dotnet user-secrets set "Smtp:Email"    "you@gmail.com"
-dotnet user-secrets set "Smtp:Password" "your-app-password"
-```
-
-For Gmail, use an **App Password** (not your account password) with 2FA enabled.
-
----
-
-## Roles
-
-Three roles are enforced (`UserRoles` enum):
-
-| Role | Value | Capabilities |
-|------|-------|--------------|
-| `User` | 0 | Browse, cart, checkout, manage own orders & profile |
-| `Admin` | 1 | Everything, including user management & role assignment |
-| `Manager` | 2 | Manage products, categories, and orders (no user management) |
-
-Admin-area access (`/admin`) is granted to **Admin** and **Manager**; the Users
-page is **Admin-only**. New users register as `User`; an Admin promotes them via
-the admin Users page or `PUT /api/admin/users/{id}/role`.
-
----
-
-## API reference
-
-Base URL: `http://localhost:5113`. All `Result<T>` responses share the shape
-`{ status, value, message, errors }`. 🔒 = requires JWT; 👑 = Admin/Manager; 👤 = Admin only.
-
-### Auth — `/api/auth`
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `/register` | Register; sends email verification code |
-| POST | `/login` | Login → JWT (or "Verification" if unverified) |
-| PUT  | `/verify-email` | Verify email with code → JWT |
-| POST | `/forgot-password/{email}` | Send password reset code |
-| PUT  | `/reset-password` | Reset password with code |
-
-### Products — `/api/products`
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | Paginated product list |
-| GET | `/filter` | Filter by query, price range, category |
-| GET | `/{id}` | Product details |
-
-### Categories — `/api/categories`
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | List all categories |
-
-### Wishlist — `/api/wishlist` 🔒
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | Paginated wishlist |
-| POST | `/` | Add a product to the wishlist |
-| DELETE | `/{productId}` | Remove a product from the wishlist |
-
-### Reviews — `/api/reviews`
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/product/{productId}` | Paginated reviews for a product |
-| POST | `/` 🔒 | Create/update the caller's review (rating 1–5) |
-
-### Addresses — `/api/addresses` 🔒
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | List the caller's saved addresses |
-| POST | `/` | Add an address |
-| PUT | `/{addressId}` | Update an address |
-| DELETE | `/{addressId}` | Delete an address |
-
-### Cart — `/api/cart` 🔒
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | Paginated cart items |
-| POST | `/` | Add item to cart |
-| PUT | `/` | Edit item quantity |
-| DELETE | `/{id}` | Remove item |
-
-### Orders — `/api/orders` 🔒
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/` | Order history (optional status filter) |
-| POST | `/checkout` | Create order from cart |
-| POST | `/{id}/confirm` | Confirm a pending order |
-| POST | `/{id}/cancel` | Cancel a pending order (restores stock) |
-| DELETE | `/{id}` | Soft-delete a non-pending order |
-
-### Users — `/api/users` 🔒
-| Method | Route | Description |
-|--------|-------|-------------|
-| PUT | `/edit` | Edit profile (username, address, phone) |
-| PUT | `/change-password` | Change password |
-| DELETE | `/` | Delete own account |
-
-### Admin — `/api/admin` 🔒👑
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/dashboard` | Analytics: sales, counts, low stock, top products |
-| POST/PUT/DELETE | `/products[/{id}]` | Product CRUD |
-| POST/PUT/DELETE | `/categories[/{id}]` | Category CRUD |
-| GET | `/orders` | All orders (filterable) |
-| PUT | `/orders/{id}/status` | Update order status |
-| GET | `/users` 👤 | All users |
-| PUT | `/users/{id}/role` 👤 | Assign user role |
-
-Full, always-current documentation is available via Swagger UI.
-
----
-
-## Testing
-
-```bash
-# Backend (xUnit + EF InMemory)
+# Execute Backend Tests (xUnit + EF InMemory)
 dotnet test VAPE.Tests/VAPE.Tests.csproj
 
-# Frontend (Vitest)
+# Execute Frontend Tests (Vitest)
 cd vape-f && pnpm test
 ```
 
----
-
-## Troubleshooting
-
-- **Cannot connect to SQL Server** — verify the instance name in
-  `ConnectionStrings:Default` (default `localhost\SQLEXPRESS`) and that the
-  database exists (`dotnet ef database update`).
-- **Emails not sending** — ensure `Smtp:Email` / `Smtp:Password` are set in
-  user-secrets and that the Gmail account uses an App Password.
-- **CORS errors in the browser** — add your frontend origin to
-  `Cors:AllowedOrigins` in `appsettings.json`.
-- **401 on protected endpoints** — the JWT expires after 30 minutes; log in again.
+> [!WARNING]
+> **Troubleshooting Guide:**
+> - **SQL Connection Failures:** Validate `ConnectionStrings:Default` in `appsettings.json`. Target defaults to `localhost\SQLEXPRESS`.
+> - **CORS Blockers:** Ensure the client origin matches `Cors:AllowedOrigins`.
+> - **401 Unauthorized:** JWT lifecycle is capped at 30 minutes. Re-authenticate upon expiration.

@@ -1,77 +1,100 @@
-# VAPE — Frontend (Angular 21)
+# 🅰️ VAPE Frontend — Angular 21 Architecture
 
-The Angular single-page app for the VAPE e-commerce platform. For the full
-project (backend, database, architecture), see the [root README](../README.md).
+> [!NOTE]
+> This is the standalone client-side application for the VAPE platform, built entirely on Angular 21 utilizing bleeding-edge rendering patterns, advanced signal-based reactivity, and a highly modular, zero-dependency SCSS UI framework.
 
-## Tech
+---
 
-- Angular 21 (standalone components, no NgModules)
-- Signals for state, `computed()` for derived state
-- Reactive Forms, RxJS
-- Lazy-loaded feature routes
-- Custom SCSS design system (no UI framework)
-- Vitest for unit tests
+## ⚙️ Core Technical Stack & Systems
 
-## Prerequisites
+- **Core Framework:** Angular 21 (`@angular/core`, `@angular/common`, `@angular/router`)
+- **Modality:** 100% Strict Standalone Components (Zero `NgModules`)
+- **Reactive State (Synchronous):** Native Angular Signals (`signal`, `computed`, `effect`)
+- **Reactive Data Streams (Asynchronous):** RxJS (`~7.8.0`) mapping and stream manipulation
+- **Forms System:** Reactive Forms (`@angular/forms`) with strict typings
+- **Styling Architecture:** Modular SCSS relying on CSS Custom Properties (Variables)
+- **Testing Engine:** Vitest integration (`vitest`, `jsdom`) for high-velocity isolated component assertion
 
-- Node.js 20+
-- [pnpm](https://pnpm.io/) (`npm i -g pnpm`)
+---
 
-## Setup & run
+## 🏗️ Detailed Architectural Topology
 
-```bash
-pnpm install
-pnpm start          # ng serve -> http://localhost:4200
-```
+The frontend is strictly segmented to ensure maximal scalability and lazy-loading efficiency.
 
-The API base URL is configured in `src/environments/environment.ts`
-(`apiUrl`, default `http://localhost:5113`). The production replacement is
-`src/environments/environment.prod.ts`.
+<details>
+<summary><b>Click to expand full structural layout</b></summary>
 
-## Build
-
-```bash
-pnpm build          # production build -> dist/vape-f
-```
-
-## Test
-
-```bash
-pnpm test           # Vitest
-```
-
-## Project structure
-
-```
+```text
 src/app/
-├── core/                 # app-wide, non-feature code
-│   ├── guards/           # authGuard, adminGuard, adminOnlyGuard, guestGuard
-│   ├── interceptors/     # auth (JWT) + error interceptors
-│   └── services/         # token storage, notifications
-├── features/             # one folder per feature, lazy-loaded
-│   ├── auth/             # login, register, verify-email, forgot/reset password
-│   ├── products/         # catalog list (search/filter) + product detail
-│   ├── cart/             # cart page + checkout
-│   ├── orders/           # order history + status actions
-│   ├── profile/          # profile, security, account deletion
-│   ├── admin/            # products, categories, orders, users management
-│   └── shell/            # main authenticated layout
-└── shared/               # reusable components (navbar, product-card,
-                          # pagination, toast) and typed API models
+ ┣ 📂 core/                # Systemic Singletons & Network Protocols
+ ┃ ┣ 📂 guards/            # Navigation Interceptors (authGuard, adminGuard)
+ ┃ ┣ 📂 interceptors/      # HTTP Middleware (Token Injection, 401 Handlers)
+ ┃ ┗ 📂 services/          # Global State & Utility (TokenStorage, Notifications)
+ ┣ 📂 features/            # Isolated Business Domains (Lazy-Loaded)
+ ┃ ┣ 📂 auth/              # Registration, Login, JWT Retrieval, Password Reset
+ ┃ ┣ 📂 products/          # Catalog List, Dynamic Filtering, Detail View
+ ┃ ┣ 📂 cart/              # Client-Side Cart Mutability & Checkout Staging
+ ┃ ┣ 📂 orders/            # Lifecycle Tracking & Fulfillment Logs
+ ┃ ┣ 📂 profile/           # User Configuration & Address Books
+ ┃ ┗ 📂 admin/             # Elevated Operational Command Center
+ ┗ 📂 shared/              # Reusable Cross-Domain Constructs
+   ┣ 📂 components/        # Dumb UI Elements (Pagination, Modals, Product Cards)
+   ┗ 📂 models/            # Strict TypeScript Interfaces & Contracts
+```
+</details>
+
+---
+
+## 🚦 Navigation Guard Rails & Security
+
+Route resolution is strictly gated by authorization interceptors that analyze JWT payload structures stored by the client:
+
+1. **`guestGuard`**: Prevents authenticated sessions from accessing login/registration vectors. Forces redirection to catalog.
+2. **`authGuard`**: Blocks anonymous access to protected internal views (Cart, Orders, Profile).
+3. **`adminGuard`**: Restricts entry to operational panels; inherently requires `Manager` or `Admin` JWT claims.
+4. **`adminOnlyGuard`**: Hard-locks the elevated user-management matrix to `Admin` claims exclusively.
+
+---
+
+## 🔄 Network Interceptors
+
+HTTP operations are intercepted at the boundaries to apply systemic rules automatically:
+
+- **Auth Interceptor:** Intercepts all outbound requests, retrieving the stored JWT from `TokenStorageService`, and appending the `Authorization: Bearer <token>` header.
+- **Error Interceptor:** Globally traps HTTP `401 Unauthorized` responses (typically due to JWT expiration), forcing a hard purge of local authentication state and routing the user to the login matrix.
+
+---
+
+## 🎨 Design System & Accessibility
+
+- **No Third-Party Component Libraries:** The entire UI (modals, skeletons, toast notifications, badges, form inputs) is constructed from scratch.
+- **CSS Custom Properties:** Global variables (`styles.scss`) dictate themes, spacing variants, color palettes, and typography metrics to ensure consistency.
+- **Accessibility Protocols:** Implements native HTML structural semantics, `aria-label`, `aria-hidden`, and `role` attributes ensuring WCAG AA baseline compliance. Focus management is applied to interactive elements like modals and navigation drawers.
+
+---
+
+## 🛠️ Execution Protocol
+
+### Initialization
+```bash
+# Guarantee pnpm is globally available: npm i -g pnpm
+pnpm install
 ```
 
-## Conventions
+### Development Server
+```bash
+pnpm start
+# Automatically binds to http://localhost:4200
+```
 
-standalone components, `inject()`,
-signals + `computed()`, `OnPush` change detection, native control flow
-(`@if`/`@for`), `input()`/`output()` functions, and accessibility (ARIA, WCAG AA).
+> [!IMPORTANT]
+> Target API parameters are defined in `src/environments/environment.ts`. The default `apiUrl` points to `https://localhost:7169`. Ensure your backend is running at this exact destination.
 
-## Authentication & roles
+### Production Pipeline
+```bash
+# Compiles AOT optimized output to /dist/vape-f
+pnpm build
 
-The auth interceptor attaches the JWT bearer token to API requests; the error
-interceptor handles `401` by logging out. Route guards gate access:
-
-- `authGuard` — requires a logged-in user
-- `adminGuard` — requires **Admin** or **Manager** (admin area)
-- `adminOnlyGuard` — requires **Admin** (user management)
-- `guestGuard` — only for anonymous users (login/register)
+# Executes isolated test suites via Vitest engine
+pnpm test
+```
