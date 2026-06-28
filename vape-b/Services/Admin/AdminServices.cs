@@ -10,6 +10,7 @@ using VAPE.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace VAPE.Services.Admin
 {
@@ -270,6 +271,19 @@ namespace VAPE.Services.Admin
                 .Take(5)
                 .ToList();
 
+            var recentOrders = _db.Orders
+                .Include(o => o.User)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(5)
+                .ProjectTo<OrderResponse>(_mapper.ConfigurationProvider)
+                .ToList();
+
+            var recentUsers = _db.Users
+                .OrderByDescending(u => u.CreatedAt)
+                .Take(5)
+                .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)
+                .ToList();
+
             var dashboard = new DashboardResponse
             {
                 TotalProducts = _db.Products.Count(),
@@ -282,6 +296,8 @@ namespace VAPE.Services.Admin
                 LowStockCount = _db.Products.Count(p => p.Stock < LowStockThreshold),
                 LowStockProducts = lowStock,
                 TopProducts = topProducts,
+                RecentOrders = recentOrders,
+                RecentUsers = recentUsers,
             };
 
             return Result<DashboardResponse>.Ok(dashboard);

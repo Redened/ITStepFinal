@@ -71,42 +71,30 @@
           <span class="live-indicator"></span>
         </div>
         <ul class="activity-feed">
-          <li class="activity-item">
-            <div class="activity-icon bg-success">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <div class="activity-content">
-              <p><strong>New Order #1042</strong> placed by John Doe.</p>
-              <span class="activity-time">2 mins ago</span>
-            </div>
-          </li>
-          <li class="activity-item">
-            <div class="activity-icon bg-warning">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>
-            </div>
-            <div class="activity-content">
-              <p><strong>Stock Alert</strong>: Mango Ice is running low (2 left).</p>
-              <span class="activity-time">15 mins ago</span>
-            </div>
-          </li>
-          <li class="activity-item">
-            <div class="activity-icon bg-info">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div class="activity-content">
-              <p><strong>New User</strong>: Jane Smith registered.</p>
-              <span class="activity-time">1 hour ago</span>
-            </div>
-          </li>
-          <li class="activity-item">
-            <div class="activity-icon bg-accent">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </div>
-            <div class="activity-content">
-              <p><strong>Order #1030</strong> shipped successfully.</p>
-              <span class="activity-time">3 hours ago</span>
-            </div>
-          </li>
+          @for (item of liveActivities(); track item.html) {
+            <li class="activity-item">
+              <div class="activity-icon" [class]="item.iconClass">
+                @if (item.type === 'order') {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                } @else if (item.type === 'user') {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                } @else if (item.type === 'stock') {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>
+                }
+              </div>
+              <div class="activity-content">
+                <p [innerHTML]="item.html"></p>
+                <span class="activity-time">{{ item.date | date:'shortTime' }}</span>
+              </div>
+            </li>
+          }
+          @if (liveActivities().length === 0) {
+            <li class="activity-item">
+              <div class="activity-content">
+                <p class="text-muted">No recent activity.</p>
+              </div>
+            </li>
+          }
         </ul>
       </section>
     </div>

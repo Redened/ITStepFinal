@@ -123,11 +123,12 @@ namespace VAPE.Services.Orders
                 query = query.Where(p => p.Status == status);
 
             var orders = query
+                .OrderByDescending(o => o.CreatedAt)
                 .Skip((req.Page - 1) * req.Take).Take(req.Take)
                 .ProjectTo<OrderResponse>(_mapper.ConfigurationProvider)
                 .ToList();
 
-            var totalCount = _db.Orders.Count();
+            var totalCount = query.Count();
 
             var result = new Paged<OrderResponse>(
                 orders, totalCount, req.Page, req.Take);

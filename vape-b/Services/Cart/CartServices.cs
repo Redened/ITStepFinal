@@ -1,4 +1,4 @@
-﻿using VAPE.Common.DTOs.Requests;
+using VAPE.Common.DTOs.Requests;
 using VAPE.Common.DTOs.Responses;
 using VAPE.Common.Results;
 using VAPE.Common.Validation;
@@ -111,7 +111,7 @@ namespace VAPE.Services.Cart
                 .ProjectTo<CartItemResponse>(_mapper.ConfigurationProvider)
                 .ToList();
 
-            var totalCount = _db.CartItems.Count();
+            var totalCount = _db.CartItems.Where(c => c.UserId == userId).Count();
 
             var result = new Paged<CartItemResponse>(
                 items, totalCount, req.Page, req.Take);

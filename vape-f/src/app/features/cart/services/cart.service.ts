@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   AddToCartDto,
@@ -26,7 +26,7 @@ export class CartService {
 
   addToCart(dto: AddToCartDto) {
     return this.http.post<void>(this.base, dto).pipe(
-      tap(() => this.cartCount.update(n => n + dto.quantity))
+      switchMap(() => this.refreshCount())
     );
   }
 

@@ -36,6 +36,9 @@
   }
 
   &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
 

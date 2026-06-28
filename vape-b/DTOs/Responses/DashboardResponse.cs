@@ -10,6 +10,8 @@ namespace VAPE.DTOs.Responses
         public int LowStockCount { get; set; }
         public List<ProductResponse> LowStockProducts { get; set; } = new();
         public List<TopProductResponse> TopProducts { get; set; } = new();
+        public List<OrderResponse> RecentOrders { get; set; } = new();
+        public List<UserResponse> RecentUsers { get; set; } = new();
     }
 
     public class TopProductResponse

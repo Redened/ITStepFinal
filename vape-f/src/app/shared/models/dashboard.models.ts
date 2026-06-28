@@ -16,6 +16,8 @@ export interface DashboardResponse {
   lowStockCount: number;
   lowStockProducts: ProductResponse[];
   topProducts: TopProductResponse[];
+  recentOrders: any[];
+  recentUsers: any[];
 }
 
 export type DashboardResponseResult = ApiResult<DashboardResponse>;
